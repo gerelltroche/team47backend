@@ -19,31 +19,31 @@ required_features = [
 loaded_model = joblib.load('knn_model.sav')
 
 
-# Do escape() on any unsafe stuff
+# Do escape(stuff) on any unsafe stuff to avoid SQL injection
 
 def validate_input(song_features):
+    # this should return ALL the missing/invalid features and not just return early.
     for feature in required_features:
         if feature not in song_features:
             return f'{feature} requires a value'
 
-        # Do this style validation for each input
+        # have to add validation to makes sure each value is correct.
         if 0 > song_features[feature] or song_features[feature] > 100:
             return f'{feature} value should be between 0 - 100'
 
 
 def format_input(song_features):
-    # do cool stuff
-
 
     # create the age variable in days as an integer from release date.
+    # can get this from spotify API
 
-    # map it all to a dictionary or DF if it doesn't work.
+    # map it all to a dictionary .. if dict doesn't work then put it in a 1 liner DF
 
-    song = thedictionary
+    #song = thedictionary
 
-    scaled_song = StandardScaler().fit_transform(song)
+    #scaled_song = StandardScaler().fit_transform(song)
 
-    loaded_model.predict_proba(scaled_song)
+    #loaded_model.predict_proba(scaled_song)
 
     return None
 
@@ -64,6 +64,6 @@ def predict():
     if error:
         return error
 
-    result = loaded_model.predict_proba(format_input(song_features)) # <--- how do i format the X_test and Y_test?
+    result = loaded_model.predict_proba(format_input(song_features))
 
     return song_features
