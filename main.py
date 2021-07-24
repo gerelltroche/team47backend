@@ -1,6 +1,9 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import joblib
 from sklearn.preprocessing import StandardScaler
+
+from SpotifyAPI import SpotifyAPI
 
 required_features = [
     'Danceability',
@@ -17,6 +20,7 @@ required_features = [
 ]
 
 loaded_model = joblib.load('knn_model.sav')
+loaded_api = SpotifyAPI('831cc784a86e40f7a94913a7760911c1', '9ec69ad406ef4de69d0c52b0becf9eb8')
 
 
 # Do escape(stuff) on any unsafe stuff to avoid SQL injection
@@ -33,22 +37,22 @@ def validate_input(song_features):
 
 
 def format_input(song_features):
-
     # create the age variable in days as an integer from release date.
     # can get this from spotify API
 
     # map it all to a dictionary .. if dict doesn't work then put it in a 1 liner DF
 
-    #song = thedictionary
+    # song = thedictionary
 
-    #scaled_song = StandardScaler().fit_transform(song)
+    # scaled_song = StandardScaler().fit_transform(song)
 
-    #loaded_model.predict_proba(scaled_song)
+    # loaded_model.predict_proba(scaled_song)
 
     return None
 
 
 app = Flask(__name__)
+CORS(app)
 
 
 @app.route("/")
@@ -67,3 +71,10 @@ def predict():
     result = loaded_model.predict_proba(format_input(song_features))
 
     return song_features
+
+
+@app.route("/autocomplete/<id>", methods=['GET'])
+def autocomplete(id):
+    response = loaded_api.topFiveTracks(id)
+
+    return response
