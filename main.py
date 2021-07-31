@@ -19,11 +19,12 @@ required_features = [
     'Duration_ms'
 ]
 
+# Load the model, use it with loaded_model
 loaded_model = joblib.load('knn_model.sav')
+
+# Load the API, use it with loaded_api
 loaded_api = SpotifyAPI('831cc784a86e40f7a94913a7760911c1', '9ec69ad406ef4de69d0c52b0becf9eb8')
 
-
-# Do escape(stuff) on any unsafe stuff to avoid SQL injection
 
 def validate_input(song_features):
     # this should return ALL the missing/invalid features and not just return early.
@@ -37,23 +38,26 @@ def validate_input(song_features):
 
 
 def format_input(song_features):
-    # create the age variable in days as an integer from release date.
-    # can get this from spotify API
-
-    # map it all to a dictionary .. if dict doesn't work then put it in a 1 liner DF
-
-    # song = thedictionary
-
-    # scaled_song = StandardScaler().fit_transform(song)
+    # crea)te the age variable in days as an integer from release date.
+    #     # can get this from spotify API
+    #
+    #     # map it all to a dictionary .. if dict doesn't work then put it in a 1 liner DF
+    #
+    #     # song = thedictionary
+    #
+    #     # scaled_song = StandardScaler().fit_transform(song
 
     # loaded_model.predict_proba(scaled_song)
 
     return None
 
 
+# Start the server listening.. PORT 5000 by default.
 app = Flask(__name__)
 CORS(app)
 
+
+# Note: Do escape(stuff) on any unsafe stuff to avoid SQL injection
 
 @app.route("/")
 def index():
@@ -78,6 +82,7 @@ def autocomplete(id):
     response = loaded_api.topFiveTracks(id)
 
     return response
+
 
 @app.route('/singlelookup/<id>', methods=['GET'])
 def singlelookup(id):
