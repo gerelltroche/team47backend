@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
+import copy
 from sklearn.preprocessing import StandardScaler
 
 from SpotifyAPI import SpotifyAPI
@@ -49,7 +50,19 @@ def format_input(song_features):
 
     # loaded_model.predict_proba(scaled_song)
 
-    return None
+    # toPop = ['spotify_id', 'spotify_href', 'spotify_name', 'spotify_artist']
+
+    # song = copy.deepcopy(song_features)
+
+    # for i in toPop:
+    #     try:
+    #         dict.pop(i)
+    #     except:
+    #         print(f"**Error: Could not pop {i} from song_features to fit to model.")
+    
+    scaled_song = StandardScaler().fit_transform(song_features)
+
+    return scaled_song
 
 
 # Start the server listening.. PORT 5000 by default.
