@@ -78,3 +78,9 @@ def autocomplete(id):
     response = loaded_api.topFiveTracks(id)
 
     return response
+
+@app.route('/singlelookup/<id>', methods=['GET'])
+def singlelookup(id):
+    response = loaded_api.audiofeatSingle(id)
+    print(response)
+    return response

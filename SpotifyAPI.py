@@ -1,5 +1,7 @@
 import json
 import time
+from random import randrange
+from datetime import datetime
 import pandas as pd
 import requests
 import base64
@@ -49,7 +51,7 @@ class SpotifyAPI:
 
         r = requests.get(endpoint, headers=self.headers)
 
-        while (r.status_code == 429):
+        while(r.status_code == 429):
             self.__isRateLimited(r)
             r = requests.get(endpoint, headers=self.headers)
 
@@ -66,6 +68,7 @@ class SpotifyAPI:
             spotify_hrefs = [d['href'] for d in r['tracks']['items']]
             spotify_names = [d['name'] for d in r['tracks']['items']]
             artists_temp = [d['artists'] for d in r['tracks']['items']]
+            spotify_ages = [d['album']['release_date'] for d in r['tracks']['items']]
         except:
             print(f"Error getting data for query {endpoint} dumping response.")
             print(json.dumps(r, indent=2))
@@ -73,6 +76,7 @@ class SpotifyAPI:
             spotify_hrefs = 'null'
             spotify_names = 'null'
             artists_temp = 'null'
+            spotify_ages = 'null'
 
         if artists_temp != 'null':
             spotify_artists = []
@@ -84,11 +88,12 @@ class SpotifyAPI:
         else:
             spotify_artists = 'null'
 
-        return spotify_ids, spotify_hrefs, spotify_names, spotify_artists
+        return spotify_ids, spotify_hrefs, spotify_names, spotify_artists, spotify_ages
 
     def topFiveTracks(self, query):
-        spotify_ids, spotify_hrefs, spotify_names, spotify_artists = self.search(q=query, type="track", limit="5")
+        spotify_ids, spotify_hrefs, spotify_names, spotify_artists, spotify_ages = self.search(q=query, type="track", limit="5")
 
+        today = datetime.now()
         topFive = {}
 
         for i in range(len(spotify_ids)):
@@ -96,10 +101,32 @@ class SpotifyAPI:
                 'spotify_id': spotify_ids[i],
                 'spotify_href': spotify_hrefs[i],
                 'spotify_name': spotify_names[i],
-                'spotify_artist': ', '.join(spotify_artists[i])
+                'spotify_age': (today - datetime.strptime(spotify_ages[i], '%Y-%m-%d')).days,
+                'spotify_artist': ', '.join(spotify_artists[i]),
+                'score': randrange(100)
             }
 
         return topFive
+
+    def audiofeatSingle(self, id):
+        endpoint = f"https://api.spotify.com/v1/audio-features/{id}"
+
+        self.__checkExpired()
+
+        r = requests.get(endpoint, headers=self.headers)
+
+        while (r.status_code == 429):
+            self.__isRateLimited(r)
+            r = requests.get(endpoint, headers=self.headers)
+
+        toPop = ['type', 'uri', 'track_href', 'analysis_url', 'time_signature', 'id']
+
+        track = r.json()
+
+        for i in toPop:
+            track.pop(i)
+
+        return track
 
     def trackSeveral(self, ids, lst):
         endpoint = "https://api.spotify.com/v1/tracks?ids="
