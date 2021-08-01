@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
 from sklearn.preprocessing import StandardScaler
+import pandas as pd
 
 from SpotifyAPI import SpotifyAPI
 
@@ -16,11 +17,14 @@ required_features = [
     'Liveliness',
     'Valence',
     'Tempo',
-    'Duration_ms'
+    'Duration_ms',
+    'Age'
 ]
+
 
 # Load the model, use it with loaded_model
 loaded_model = joblib.load('knn_model.sav')
+
 
 # Load the API, use it with loaded_api
 loaded_api = SpotifyAPI('831cc784a86e40f7a94913a7760911c1', '9ec69ad406ef4de69d0c52b0becf9eb8')
@@ -33,23 +37,18 @@ def validate_input(song_features):
             return f'{feature} requires a value'
 
         # have to add validation to makes sure each value is correct.
-        if 0 > song_features[feature] or song_features[feature] > 100:
-            return f'{feature} value should be between 0 - 100'
+        # if 0 > song_features[feature] or song_features[feature] > 100:
+        #     return f'{feature} value should be between 0 - 100'
 
 
 def format_input(song_features):
-    # crea)te the age variable in days as an integer from release date.
-    #     # can get this from spotify API
-    #
-    #     # map it all to a dictionary .. if dict doesn't work then put it in a 1 liner DF
-    #
-    #     # song = thedictionary
-    #
-    #     # scaled_song = StandardScaler().fit_transform(song
+    # Create 1-line DF
+    df = pd.DataFrame({k: [v] for k, v in song_features.items()})
 
-    # loaded_model.predict_proba(scaled_song)
+    # format with scaler
+    formatted = StandardScaler().fit_transform(df)
 
-    return None
+    return formatted
 
 
 # Start the server listening.. PORT 5000 by default.
@@ -66,6 +65,7 @@ def index():
 
 @app.route("/predict", methods=['GET'])
 def predict():
+
     song_features = request.args.to_dict()
     error = validate_input(song_features)
 
@@ -73,8 +73,9 @@ def predict():
         return error
 
     result = loaded_model.predict_proba(format_input(song_features))
-
-    return song_features
+    result = str(result)
+    print(result)
+    return result
 
 
 @app.route("/autocomplete/<id>", methods=['GET'])
