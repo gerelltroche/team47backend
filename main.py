@@ -17,7 +17,8 @@ required_features = [
     'Liveliness',
     'Valence',
     'Tempo',
-    'Duration_ms'
+    'Duration_ms',
+    'Age'
 ]
 
 mean_std_dict = {
