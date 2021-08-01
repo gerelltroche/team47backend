@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import joblib
+import copy
 from sklearn.preprocessing import StandardScaler
 
 from SpotifyAPI import SpotifyAPI
@@ -18,6 +19,21 @@ required_features = [
     'Tempo',
     'Duration_ms'
 ]
+
+mean_std_dict = {
+ 'danceability': {'mean': 0.6269789821124379, 'std': 0.16928329705416426},
+ 'energy': {'mean': 0.6111509595001064, 'std': 0.22867511151405742},
+ 'key': {'mean': 5.301559838160136, 'std': 3.601365222814598},
+ 'loudness': {'mean': -8.413418041950585, 'std': 4.773060044962174},
+ 'speechiness': {'mean': 0.11820605036201066, 'std': 0.12779958795305896},
+ 'acousticness': {'mean': 0.294434796439521, 'std': 0.3048065194948211},
+ 'instrumentalness': {'mean': 0.15021815809279174, 'std': 0.3067623266279394},
+ 'liveness': {'mean': 0.17988611850510877, 'std': 0.1454453882431879},
+ 'valence': {'mean': 0.45340037354663404, 'std': 0.24082727978555382},
+ 'tempo': {'mean': 121.6263309199322, 'std': 29.16301178801898},
+ 'duration_ms': {'mean': 207722.33698892675, 'std': 76552.8000824765},
+ 'age': {'mean': 528.288224020443, 'std': 26.309181841051196}
+}
 
 # Load the model, use it with loaded_model
 loaded_model = joblib.load('knn_model.sav')
@@ -38,18 +54,13 @@ def validate_input(song_features):
 
 
 def format_input(song_features):
-    # crea)te the age variable in days as an integer from release date.
-    #     # can get this from spotify API
-    #
-    #     # map it all to a dictionary .. if dict doesn't work then put it in a 1 liner DF
-    #
-    #     # song = thedictionary
-    #
-    #     # scaled_song = StandardScaler().fit_transform(song
 
-    # loaded_model.predict_proba(scaled_song)
+    for key in song_features.keys():
+        song_features[key] = (song_features[key] - mean_std_dict[key.lower()]['mean'])/mean_std_dict[key.lower()]['std']
+    
+    scaled_song = StandardScaler().fit_transform(song_features)
 
-    return None
+    return scaled_song
 
 
 # Start the server listening.. PORT 5000 by default.
