@@ -4,6 +4,7 @@ from flask_cors import CORS
 import joblib
 import copy
 from sklearn.preprocessing import StandardScaler
+import numpy as np
 
 from SpotifyAPI import SpotifyAPI
 
@@ -58,11 +59,10 @@ def validate_input(song_features):
 
 def format_input(song_features):
 
-    for key in song_features.keys():
-        song_features[key] = (float(song_features[key]) - mean_std_dict[key.lower()]['mean'])/mean_std_dict[key.lower()]['std']
-
-    df_song_features = pd.DataFrame({k: [v] for k, v in  song_features.items()})
-
+    df_song_features = [(float(song_features[key]) - mean_std_dict[key.lower()]['mean'])/mean_std_dict[key.lower()]['std'] for key in song_features.keys()]
+    df_song_features = np.array(df_song_features).reshape(1, -1)
+    print('array')
+    print(df_song_features)
     return df_song_features
 
 
@@ -89,7 +89,9 @@ def predict():
     input = format_input(song_features)
 
     result = loaded_model.predict_proba(input)
-    result = str(result[0][1])
+    print(loaded_model)
+    print('result')
+    print(result)
     return result
 
 
@@ -105,3 +107,4 @@ def singlelookup(id):
     response = loaded_api.audiofeatSingle(id)
     print(response)
     return response
+
